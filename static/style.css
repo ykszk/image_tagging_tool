@@ -1,0 +1,17 @@
+img {
+    max-width: 256px;
+    max-height: 256px;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+label, input[type='checkbox'] {
+    cursor: pointer;
+}

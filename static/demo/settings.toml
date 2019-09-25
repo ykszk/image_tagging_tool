@@ -1,0 +1,3 @@
+img_dir = 'static/demo/imgs'
+tag_dir = 'static/demo/tags'
+tags = ['Car','Bicycle','Tree','Table','Building','Sign']

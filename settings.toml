@@ -1,0 +1,3 @@
+img_dir = 'static/imgs_dev'
+tag_dir = 'tags'
+tags = ['Neck', 'Chest','Heart','Abdomen','Pelvis','Femur','Crus','Pedal']
