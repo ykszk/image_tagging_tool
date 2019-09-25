@@ -1,4 +1,5 @@
 # Image Tagging Application #
+![screenshot](static/demo/screenshot.png "screenshot")
 
 ## Prepare ##
 1. Install packages
