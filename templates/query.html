@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<body>
+  <div class="ui container pusher">
+    <h1 class="ui header">{{ title if title else "Image Tagging"}}</h1>
+    <div class="ui celled four column doubling stackable grid">
+      {% for image_name, image_path, checked_tag in zip(image_names, image_paths, checked_tags) %}
+      <div class="column ui center aligned" id="{{image_name}}">
+        <figure style="margin:0">
+          <figcaption>{{image_name}}</figcaption>
+          <a href="{{image_path}}" target="_blank" title="{{image_name}}">
+            <img class="ui centered image" src="{{image_path}}" alt="{{image_name}}"></img>
+          </a>
+        </figure>
+        <form action="/post" method="put" name={{image_name}}>
+          {% for tag in tags %}
+          <label class="unselectable" style="display:inline-block">
+            <input type="checkbox" name="{{tag}}" title="{{tag}}" onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else ''}}>
+            {{tag}}</label>
+            {% endfor %}
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+
+{% endblock %}

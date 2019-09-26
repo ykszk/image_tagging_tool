@@ -6,17 +6,30 @@ app.jinja_env.globals.update(zip=zip)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', tags=settings['tags'])
 
 @app.route('/list')
 def list_page():
-    checked_tags = [utils.load_tags(filename) for filename in tag_filenames]
+    checked_tags = [set(utils.load_tags(filename)) for filename in tag_filenames]
     title = "Image Tagging - " + settings['img_dir']
     return render_template('list.html',title=title,
                            tags=settings['tags'],
                            image_names=image_names,
                            image_paths=image_paths,
                            checked_tags=checked_tags)
+
+@app.route('/query')
+def query():
+    checked_tags = [set(utils.load_tags(filename)) for filename in tag_filenames]
+    queried_tags = set([k for k, v in request.args.items() if v=='on'])
+    title = 'Query result for "{}"'.format(' & '.join([str(t) for t in sorted(queried_tags)]))
+    matches = [queried_tags==ts for ts in checked_tags]
+    return render_template('query.html',title=title,
+                           tags=settings['tags'],
+                           image_names=[e for m,e in zip(matches, image_names) if m],
+                           image_paths=[e for m,e in zip(matches, image_paths) if m],
+                           checked_tags=[e for m,e in zip(matches, checked_tags) if m]
+    )
 
 @app.route('/put', methods=["PUT"])
 def put():
