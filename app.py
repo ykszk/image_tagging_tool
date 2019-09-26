@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 import utils
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip)
+from collections import Counter
 
 @app.route('/')
 def index():
@@ -30,6 +31,23 @@ def query():
                            image_paths=[e for m,e in zip(matches, image_paths) if m],
                            checked_tags=[e for m,e in zip(matches, checked_tags) if m]
     )
+
+@app.route('/stats')
+def stats():
+    checked_tags = [set(utils.load_tags(filename)) for filename in tag_filenames]
+    delim = ' & '
+    keys = [delim.join([str(t) for t in ct]) for ct in checked_tags]
+    counts = Counter(keys)
+    stats = []
+    for k, v in counts.items():
+        if k:
+            queries = k.split(delim)
+        else:
+            queries = []
+        url = '/query?' + '&'.join(['{}=on'.format(q) for q in queries])
+        stats.append((k,v,url))
+    return render_template('stats.html', title='Statistics',
+                           stats=stats)
 
 @app.route('/put', methods=["PUT"])
 def put():

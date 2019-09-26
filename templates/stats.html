@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<body>
+  <div class="ui container pusher">
+    <h1 class="ui header">{{title}}</h1>
+    <div>
+      <table class="ui celled table">
+        <thead>
+          <tr><th>Tags</th>
+            <th>Count</th>
+            <th>Show</th>
+          </tr></thead>
+        <tbody>
+          {% for key, count, url in stats %}
+          <tr>
+            <td data-label="Tags">{{key if key else 'None'}}</td>
+            <td data-label="Count">{{count}}</td>
+            <td data-label="show"><a href="{{url}}" target="_blank">Go</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+
+{% endblock %}
