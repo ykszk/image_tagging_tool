@@ -6,16 +6,13 @@ app.jinja_env.globals.update(zip=zip)
 
 @app.route('/')
 def index():
-    checked_tags = []
-    for image_name in image_names:
-        try:
-            filename = os.path.splitext(os.path.join(settings['tag_dir'],image_name))[0] + '.txt'
-            checked_tags.append(set(utils.load_tags(filename)))
-        except:
-            checked_tags.append(set())
+    return render_template('index.html')
 
+@app.route('/list')
+def list_page():
+    checked_tags = [utils.load_tags(filename) for filename in tag_filenames]
     title = "Image Tagging - " + settings['img_dir']
-    return render_template('index.html',title=title,
+    return render_template('list.html',title=title,
                            tags=settings['tags'],
                            image_names=image_names,
                            image_paths=image_paths,
@@ -44,4 +41,6 @@ if __name__ == "__main__":
     for d in image_dirs: # create directories
         os.makedirs(os.path.join(settings['tag_dir'],d), exist_ok=True)
 
-    app.run(debug=True)
+    tag_filenames = [os.path.splitext(os.path.join(settings['tag_dir'],image_name))[0] + '.txt' for image_name in image_names]
+
+    app.run(**settings['server'])

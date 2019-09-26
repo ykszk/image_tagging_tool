@@ -1,3 +1,8 @@
-img_dir = 'static/imgs_dev'
+img_dir = 'static/imgs'
 tag_dir = 'tags'
-tags = ['Neck', 'Chest','Heart','Abdomen','Pelvis','Femur','Crus','Pedal']
+tags = ['Neck', 'Chest','Abdomen','Pelvis','Femur','Crus','Pedal','Heart']
+
+[server]
+host = 'localhost'
+port = 5000
+debug = true
