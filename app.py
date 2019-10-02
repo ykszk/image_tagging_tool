@@ -46,6 +46,7 @@ def stats():
             queries = []
         url = '/query?' + '&'.join(['{}=on'.format(q) for q in queries])
         stats.append((k,v,url))
+    stats = sorted(stats, key=lambda s:-s[1])
     return render_template('stats.html', title='Statistics',
                            stats=stats)
 
