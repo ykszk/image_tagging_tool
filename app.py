@@ -21,10 +21,16 @@ def list_page():
 
 @app.route('/query')
 def query():
+    include_tags = set([k for k, v in request.args.items() if v=='in'])
+    exclude_tags = set([k for k, v in request.args.items() if v=='ex'])
+    queried_tags = include_tags | exclude_tags
     checked_tags = [set(utils.load_tags(filename)) for filename in tag_filenames]
-    queried_tags = set([k for k, v in request.args.items() if v=='on'])
-    title = 'Query result for "{}"'.format(' & '.join([str(t) for t in sorted(queried_tags)]))
-    matches = [queried_tags==ts for ts in checked_tags]
+    all_tags = sorted(settings['tags'])
+    checked_tags_vectors = [[t in ct for t in all_tags if t in queried_tags] for ct in checked_tags]
+    queried_tags_vector = [qt in include_tags for qt in sorted(queried_tags)]
+    title = 'Query result for "{}"'.format(' & '.join([str(t)  if t in include_tags else ('-'+str(t)) for t in sorted(queried_tags)]))
+    matches = [ctv==queried_tags_vector for ctv in checked_tags_vectors]
+    title += ', {} images found'.format(sum(matches))
     return render_template('query.html',title=title,
                            tags=settings['tags'],
                            image_names=[e for m,e in zip(matches, image_names) if m],
@@ -44,7 +50,10 @@ def stats():
             queries = k.split(delim)
         else:
             queries = []
-        url = '/query?' + '&'.join(['{}=on'.format(q) for q in queries])
+        url = '/query?' + '&'.join(
+            ['{}=in'.format(q) for q in queries]+
+            ['{}=ex'.format(q) for q in set(settings['tags'])-set(queries)]
+        )
         stats.append((k,v,url))
     stats = sorted(stats, key=lambda s:-s[1])
     return render_template('stats.html', title='Statistics',

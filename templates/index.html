@@ -12,9 +12,11 @@
       <h2 class="ui header">Query</h2>
       <form class="ui form" action="/query" method="GET" name="query">
         {% for tag in tags %}
-        <label class="unselectable" style="display:inline-block;">
-          <input type="checkbox" name="{{tag}}" title="{{tag}}">
-          {{tag}}
+        <fieldset style="display:inline-block">
+          <legend>{{tag}}</legend>
+          <label class="unselectable"><input type="radio" name="{{tag}}" value="in">include</label>
+          <label class="unselectable"><input type="radio" name="{{tag}}" value="ex">exclude</label>
+        </fieldset>
         </label>
           {% endfor %}
           <input class="ui primary button" type="submit" value="Submit">
