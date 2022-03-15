@@ -1,0 +1,7 @@
+img_dir = 'static/demo/imgs'
+tag_dir = 'static/demo/tags.sqlite3'
+tags = ['Car','Bicycle','Tree','Table','Building','Sign']
+
+[server]
+host = 'localhost'
+port = 5000
