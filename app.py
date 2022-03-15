@@ -71,6 +71,9 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Image tagging application.')
     parser.add_argument('-s','--settings', help="Setting file. (default: %(default)s)",metavar='<filename>',default='settings.toml')
+    parser.add_argument('--debug',
+                        help='Run in debug mode',
+                        action='store_true')
     args = parser.parse_args()
 
     settings = utils.load_settings(args.settings)
@@ -83,5 +86,9 @@ if __name__ == "__main__":
         os.makedirs(os.path.join(settings['tag_dir'],d), exist_ok=True)
 
     tag_filenames = [os.path.splitext(os.path.join(settings['tag_dir'],image_name))[0] + '.txt' for image_name in image_names]
-
-    app.run(**settings['server'])
+    print(settings['server'])
+    if args.debug:
+        app.run(**settings['server'])
+    else:
+        from waitress import serve
+        serve(app, **settings['server'])

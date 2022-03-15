@@ -4,7 +4,7 @@
 ## Prepare ##
 1. Install packages
 
-    pip install flask toml
+    pip install flask waitress toml
 
 2. Put image files in `static/imgs`
 3. Edit config file `settings.toml`
