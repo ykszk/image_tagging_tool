@@ -1,5 +1,5 @@
-import os
-from flask import Flask, render_template, request
+from pathlib import Path
+from flask import Flask, Blueprint, render_template, request
 import utils
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip)
@@ -32,8 +32,8 @@ class TXTDB(DBBase):
     def checked_tags(self):
         return [set(utils.load_tags(filename)) for filename in self.tag_filenames]
     def save_tags(self, key, tags):
-        image_filename = os.path.join(settings['tag_dir'], key)
-        tag_filename = os.path.splitext(image_filename)[0] + '.txt'
+        image_filename = Path(settings['tag_dir']) / key
+        tag_filename = Path(image_filename).with_suffix('.txt')
         utils.save_tags(tag_filename, tags)
 
 import sqlalchemy
@@ -51,8 +51,8 @@ class SQLite3DB(DBBase):
             self.data = data
         def tags(self):
             return set(self.data.split(','))
-    def __init__(self, filename, keys):
-        self.engine = sqlalchemy.create_engine(filename, echo=True)
+    def __init__(self, filename, keys, echo):
+        self.engine = sqlalchemy.create_engine(filename, echo=echo)
         Base.metadata.create_all(bind=self.engine)
 
         self.keys = keys
@@ -144,20 +144,29 @@ if __name__ == "__main__":
 
     settings = utils.load_settings(args.settings)
 
-    img_dir = settings['img_dir']
-    image_paths = utils.list_images(img_dir)
-    image_names = [image[len(img_dir)+1:] for image in image_paths]
-    image_dirs = set([os.path.dirname(name) for name in image_names])
+    img_dir = Path(settings['img_dir'])
+    IMAGE_URL = 'images'
+    blueprint = Blueprint(IMAGE_URL, __name__, static_url_path='/images', static_folder=img_dir)
+    app.register_blueprint(blueprint)
+    image_paths = sorted(img_dir.glob("**/*['.png','.jpg','.jpeg']"))
+    image_names = [str(image.relative_to(img_dir)) for image in image_paths]
+    image_paths = [str(Path(IMAGE_URL) / p) for p in image_names]
 
-    if settings['tag_dir'].endswith('.sqlite3'):
-        db = SQLite3DB('sqlite:///{}'.format(settings['tag_dir']), image_names)
+
+    tag_dir = settings['tag_dir']
+    if tag_dir.endswith('.sqlite3') or tag_dir.endswith('.db'):
+        db = SQLite3DB('sqlite:///{}'.format(settings['tag_dir']), image_names, args.debug)
     else:
-        for d in image_dirs: # create directories
-            os.makedirs(os.path.join(settings['tag_dir'],d), exist_ok=True)
-        tag_filenames = [os.path.splitext(os.path.join(settings['tag_dir'],image_name))[0] + '.txt' for image_name in image_names]
+        tag_dir = Path(tag_dir)
+        image_dirs = set([Path(name).parent for name in image_names])
+        for d in image_dirs:
+            (tag_dir / d).mkdir(parents=True, exist_ok=True)
+        tag_filenames = [(tag_dir / image_name).with_suffix('.txt') for image_name in image_names]
         db = TXTDB(tag_filenames)
     if args.debug:
+        settings.pop('threads', None)
         app.run(**settings['server'])
     else:
+        print(settings['server'])
         from waitress import serve
         serve(app, **settings['server'])

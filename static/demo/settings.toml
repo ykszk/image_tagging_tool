@@ -5,3 +5,4 @@ tags = ['Car','Bicycle','Tree','Table','Building','Sign']
 [server]
 host = 'localhost'
 port = 5000
+threads = 4
