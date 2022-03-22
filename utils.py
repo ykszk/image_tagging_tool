@@ -26,6 +26,7 @@ def load_tags(filename):
         return f.read().split()
 
 def load_settings(filename):
+    settings = {"server":{"threads": 10}, "multilabel": True}
     with open(filename) as f:
-        settings = toml.load(f)
+        settings.update(toml.load(f))
         return settings

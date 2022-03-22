@@ -1,8 +1,9 @@
 img_dir = 'static/demo/imgs'
 tag_dir = 'static/demo/tags.sqlite3'
 tags = ['Car','Bicycle','Tree','Table','Building','Sign']
+multilabel = false
 
 [server]
 host = 'localhost'
 port = 5000
-threads = 4
+threads = 10

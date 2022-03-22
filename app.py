@@ -86,6 +86,7 @@ def list_page():
     title = "Image Tagging - " + settings['img_dir']
     return render_template('list.html',title=title,
                            tags=settings['tags'],
+                           multilabel=settings['multilabel'],
                            image_names=image_names,
                            image_paths=image_paths,
                            checked_tags=checked_tags)
@@ -129,7 +130,10 @@ def stats():
 
 @app.route('/put', methods=["PUT"])
 def put():
-    tags = sorted([k for k, v in request.form.items() if v=='on'])
+    if settings['multilabel']:
+        tags = sorted([k for k, v in request.form.items() if v=='on'])
+    else:
+        tags = sorted(request.form.values())
     db.save_tags(request.args['name'], tags)
     return '', 200
 
@@ -164,7 +168,8 @@ if __name__ == "__main__":
         tag_filenames = [(tag_dir / image_name).with_suffix('.txt') for image_name in image_names]
         db = TXTDB(tag_filenames)
     if args.debug:
-        settings.pop('threads', None)
+        settings['server'].pop('threads', None)
+        print(settings['server'])
         app.run(**settings['server'])
     else:
         print(settings['server'])

@@ -1,5 +1,5 @@
 function checkbox_changed(event) {
-  let form = event.parentNode.parentNode;
+  let form = event.parentNode;
   let formData = new FormData(form)
   fetch('/put?name='+encodeURIComponent(form.name), {
     method: 'PUT',
