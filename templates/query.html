@@ -13,12 +13,19 @@
             <img class="ui centered image" src="{{image_path}}" alt="{{image_name}}"></img>
           </a>
         </figure>
-        <form action="/post" method="put" name={{image_name}}>
+        <form action="/post" method="put" name="{{image_name}}">
           {% for tag in tags %}
-          <label class="unselectable" style="display:inline-block">
-            <input type="checkbox" name="{{tag}}" title="{{tag}}" onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else ''}}>
+          {% if multilabel %}
+          <input type="checkbox" name="{{tag}}" title="{{tag}}" id="{{image_name}}_{{tag}}"
+            onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else '' }}>
+          <label class="unselectable" for="{{image_name}}_{{tag}}" style="display:inline-block">
             {{tag}}</label>
-            {% endfor %}
+          {% else %}
+          <input type="radio" name="{{image_name}}" value="{{tag}}" id="{{image_name}}_{{tag}}"
+            onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else '' }}>
+          <label class="unselectable" for="{{image_name}}_{{tag}}" style="display:inline-block">{{tag}}</label>
+          {% endif %}
+          {% endfor %}
         </form>
       </div>
       {% endfor %}
