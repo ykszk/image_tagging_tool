@@ -1,10 +1,11 @@
+import sys
 from pathlib import Path
 from flask import Flask, Blueprint, render_template, request
 import utils
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip)
 from collections import Counter
-
+import re
 
 from abc import ABCMeta, abstractmethod
 
@@ -58,10 +59,23 @@ class SQLite3DB(DBBase):
         self.keys = keys
         with Session(self.engine) as session:
             existing_keys = set((r.key for r in session.query(self.Record).all()))
+            keys = set(keys)
+            if keys != existing_keys:
+                print('image fielname mismatch between database and image directory')
+                diff = keys - existing_keys
+                if diff:
+                    print('files exists in image directory but not in database')
+                    print(diff)
+                diff = existing_keys - keys
+                if diff:
+                    print('files exists in database but not in image directory')
+                    print(diff)
+                sys.exit(1)
             for key in keys:
                 if key not in existing_keys:
                     record = self.Record(key, '')
                     session.add(record)
+            
             session.commit()
 
     def checked_tags(self):
@@ -152,9 +166,18 @@ if __name__ == "__main__":
     IMAGE_URL = 'images'
     blueprint = Blueprint(IMAGE_URL, __name__, static_url_path='/images', static_folder=img_dir)
     app.register_blueprint(blueprint)
-    image_paths = sorted(img_dir.glob("**/*['.png','.jpg','.jpeg']"))
+    image_paths = []
+    img_pattern = re.compile(r'.+\.jpg|png|jpeg')
+    for filename in img_dir.rglob('*'):
+        if filename.is_dir():
+            continue
+        if img_pattern.search(filename.name):
+            image_paths.append(filename)
+
+    image_paths.sort() # the order of filenames needs to match that of the db's
     image_names = [str(image.relative_to(img_dir)) for image in image_paths]
     image_paths = [str(Path(IMAGE_URL) / p) for p in image_names]
+    print(len(image_paths), 'images found in', img_dir)
 
 
     tag_dir = settings['tag_dir']
