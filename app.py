@@ -1,12 +1,13 @@
 import sys
 from pathlib import Path
-from flask import Flask, Blueprint, render_template, request
+from flask import Flask, Blueprint, render_template, request, send_file
 import utils
 
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip)
 from collections import Counter
 import re
+import tempfile
 
 from abc import ABCMeta, abstractmethod
 
@@ -182,6 +183,22 @@ def put():
     return '', 200
 
 
+@app.route('/download_as_csv')
+def csv():
+    checked_tags = db.checked_tags()
+    with tempfile.NamedTemporaryFile(suffix='.csv', mode='w',
+                                     delete=False) as temp:
+        print(temp.name)
+        temp.write('filename,tags\n')
+        for fn, ct in zip(image_names, checked_tags):
+            temp.write('{},{}\n'.format(fn, ';'.join(ct)))
+        temp.close()
+        return send_file(temp.name,
+                         as_attachment=True,
+                         download_name='tags.csv',
+                         mimetype='text/csv')
+
+
 import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Image tagging application.')
@@ -203,7 +220,7 @@ if __name__ == "__main__":
     blueprint = Blueprint(IMAGE_URL,
                           __name__,
                           static_url_path='/images',
-                          static_folder=img_dir)
+                          static_folder=str(img_dir))
     app.register_blueprint(blueprint)
     image_paths = []
     img_pattern = re.compile(r'.+\.jpg|png|jpeg')
@@ -213,7 +230,8 @@ if __name__ == "__main__":
         if img_pattern.search(filename.name):
             image_paths.append(filename)
 
-    image_paths.sort()  # the order of filenames needs to match that of the db's
+    image_paths.sort(
+    )  # the order of filenames needs to match that of the db's
     image_names = [str(image.relative_to(img_dir)) for image in image_paths]
     image_paths = [str(Path(IMAGE_URL) / p) for p in image_names]
     print(len(image_paths), 'images found in', img_dir)
