@@ -2,36 +2,28 @@
 {% block content %}
 
 <body>
-  {% if False %}
-  <div class="ui sidebar vertical menu visible">
-    {% for image_name, image_path in zip(image_names, image_paths) %}
-    <a class="item" href="#{{image_name}}">{{image_name}}</a>
-    {% endfor %}
-  </div>
-  {% endif %}
   <div class="ui container pusher">
-    <h1 class="ui header">{{ title if title else "Image Tagging"}}</h1>
+    <h1 class="ui header">Image Tagging</h1>
     <div class="ui celled four column doubling stackable grid">
-      {% for image_name, image_path, checked_tag in zip(image_names, image_paths, checked_tags) %}
-      <div class="column ui center aligned" id="{{image_name}}">
+      {% for item in image_name_path_tags %}
+      <div class="column ui center aligned" id="{{item.image_name}}">
         <figure style="margin:0">
-          <figcaption>{{image_name}}</figcaption>
-          <a href="{{image_path}}" target="_blank" title="{{image_name}}">
-            <img class="ui centered image" src="{{image_path}}" alt="{{image_name}}"></img>
+          <figcaption>{{item.image_name}}</figcaption>
+          <a href="{{item.image_path}}" target="_blank" title="{{item.image_name}}">
+            <img class="ui centered image" src="{{item.image_path}}" alt="{{item.image_name}}"></img>
           </a>
         </figure>
-
-        <form action="/post" method="put" name="{{image_name}}">
+        <form action="/post" method="put" name="{{item.image_name}}">
           {% for tag in tags %}
           {% if multilabel %}
-          <input type="checkbox" name="{{tag}}" title="{{tag}}" id="{{image_name}}_{{tag}}"
-            onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else '' }}>
-          <label class="unselectable" for="{{image_name}}_{{tag}}" style="display:inline-block">
+          <input type="checkbox" name="{{tag}}" title="{{tag}}" id="{{item.image_name}}_{{tag}}"
+            onchange="checkbox_changed(this)" { if tag in item.checked_tag }checked{ endif }>
+          <label class="unselectable" for="{{item.image_name}}_{{tag}}" style="display:inline-block">
             {{tag}}</label>
           {% else %}
-          <input type="radio" name="{{image_name}}" value="{{tag}}" id="{{image_name}}_{{tag}}"
-            onchange="checkbox_changed(this)" {{'checked' if tag in checked_tag else '' }}>
-          <label class="unselectable" for="{{image_name}}_{{tag}}" style="display:inline-block">{{tag}}</label>
+          <input type="radio" name="{{item.image_name}}" value="{{tag}}" id="{{item.image_name}}_{{tag}}"
+            onchange="checkbox_changed(this)" { if tag in item.checked_tag }checked{ endif }>
+          <label class="unselectable" for="{{item.image_name}}_{{tag}}" style="display:inline-block">{{tag}}</label>
           {% endif %}
           {% endfor %}
         </form>
