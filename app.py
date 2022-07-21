@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
 from flask import Flask, Blueprint, render_template, request, send_file
+from collections import namedtuple
 import utils
 
 app = Flask(__name__)
-app.jinja_env.globals.update(zip=zip)
 from collections import Counter
 import re
 import tempfile
@@ -118,18 +118,18 @@ class SQLite3DB(DBBase):
 def index():
     return render_template('index.html', tags=settings['tags'])
 
+ImageNamePathTag = namedtuple('ImageNamePathTag', ['image_name', 'image_path', 'checked_tags'])
 
 @app.route('/list')
 def list_page():
     checked_tags = db.checked_tags()
     title = "Image Tagging - " + settings['img_dir']
+    image_name_path_tags = [ImageNamePathTag(*v) for v in zip(image_names, image_paths, checked_tags)]
     return render_template('list.html',
                            title=title,
                            tags=settings['tags'],
                            multilabel=settings['multilabel'],
-                           image_names=image_names,
-                           image_paths=image_paths,
-                           checked_tags=checked_tags)
+                           image_name_path_tags=image_name_path_tags)
 
 
 @app.route('/query')
@@ -144,14 +144,14 @@ def query():
     ]))
     matches = db.query(include_tags, exclude_tags)
     title += ', {} images found'.format(sum(matches))
+    image_name_path_tags = [ImageNamePathTag(n,p,t) for n,p,t,m in zip(image_names, image_paths, checked_tags, matches) if m]
     return render_template(
-        'query.html',
+        'list.html',
         title=title,
         tags=settings['tags'],
-        image_names=[e for m, e in zip(matches, image_names) if m],
-        image_paths=[e for m, e in zip(matches, image_paths) if m],
-        checked_tags=[e for m, e in zip(matches, checked_tags) if m])
+        image_name_path_tags=image_name_path_tags)
 
+StatItem = namedtuple('StatItem', ['key', 'count', 'url'])
 
 @app.route('/stats')
 def stats():
@@ -168,8 +168,8 @@ def stats():
         url = '/query?' + '&'.join(
             ['{}=in'.format(q) for q in queries] +
             ['{}=ex'.format(q) for q in set(settings['tags']) - set(queries)])
-        stats.append((k, v, url))
-    stats = sorted(stats, key=lambda s: -s[1])
+        stats.append(StatItem(k, v, url))
+    stats = sorted(stats, key=lambda s: -s.count)
     return render_template('stats.html', title='Statistics', stats=stats)
 
 

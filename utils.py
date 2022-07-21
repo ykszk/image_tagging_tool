@@ -1,6 +1,7 @@
 import os
 import functools
 import toml
+from pathlib import Path
 
 def exception_handler(default_value=None):
     '''
@@ -26,7 +27,11 @@ def load_tags(filename):
         return f.read().split()
 
 def load_settings(filename):
+    filename = Path(filename)
     settings = {"server":{"threads": 10}, "multilabel": True}
     with open(filename) as f:
         settings.update(toml.load(f))
-        return settings
+    if not Path(settings['tag_dir']).is_absolute():
+        settings['tag_dir'] = str(filename.parent / settings['tag_dir'])
+        settings['img_dir'] = str(filename.parent / settings['img_dir'])
+    return settings

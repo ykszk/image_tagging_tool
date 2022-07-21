@@ -1,3 +1,6 @@
-Building
+Table
 Car
+Bicycle
+Building
 Tree
+Sign

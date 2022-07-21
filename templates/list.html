@@ -17,12 +17,12 @@
           {% for tag in tags %}
           {% if multilabel %}
           <input type="checkbox" name="{{tag}}" title="{{tag}}" id="{{item.image_name}}_{{tag}}"
-            onchange="checkbox_changed(this)" { if tag in item.checked_tag }checked{ endif }>
+            onchange="checkbox_changed(this)" {% if tag in item.checked_tags %}checked{% endif %}>
           <label class="unselectable" for="{{item.image_name}}_{{tag}}" style="display:inline-block">
             {{tag}}</label>
           {% else %}
           <input type="radio" name="{{item.image_name}}" value="{{tag}}" id="{{item.image_name}}_{{tag}}"
-            onchange="checkbox_changed(this)" { if tag in item.checked_tag }checked{ endif }>
+            onchange="checkbox_changed(this)" {% if tag in item.checked_tags %}checked{% endif %}>
           <label class="unselectable" for="{{item.image_name}}_{{tag}}" style="display:inline-block">{{tag}}</label>
           {% endif %}
           {% endfor %}
@@ -33,6 +33,6 @@
   </div>
 </body>
 
-{% include "./footer.html" %}
+{% include "footer.html" %}
 
 {% endblock %}
